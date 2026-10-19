@@ -31,9 +31,9 @@ export default function PricingPage() {
 
   return (
     <div className="wrap section">
-      <p className="kicker">Pricing</p>
-      <h1 className="display">Plans</h1>
-      <p className="muted">Amounts come from the shared pricing configuration. Stripe price IDs are environment variables, not hardcoded keys.</p>
+      <p className="kicker">Prices</p>
+      <h1 className="display">Start free. Pay only if you want more saved plans.</h1>
+      <p className="muted">The free plan keeps one house. Paid plans are for saving more. If card checkout is not turned on, nothing is charged.</p>
       {message ? <p className="banner">{message} Current browser plan: {readPlan()}.</p> : null}
       <div className="grid-3">
         {PLANS.map((plan) => (

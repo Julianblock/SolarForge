@@ -52,12 +52,12 @@ export function ToolPage({ slug, title, intro }: { slug: string; title: string; 
       <Disclaimer />
       <div className="grid-2" style={{ marginTop: "1rem" }}>
         <form className="card fields" onSubmit={(event) => event.preventDefault()}>
-          <label>Latitude<input type="number" value={latitude} onChange={(event) => setLatitude(Number(event.target.value))} /></label>
+          <label>How far north or south<span className="hint">This is latitude. Denver is about 40. The equator is 0. South of the equator, use a minus sign.</span><input type="number" value={latitude} onChange={(event) => setLatitude(Number(event.target.value))} /></label>
           {"solar-battery-calculator,off-grid-solar-calculator,solar-payback-calculator,solar-system-size-calculator,solar-calculator,solar-panel-cost-calculator".includes(slug) ? (
-            <label>Daily use, kWh<input type="number" value={daily} onChange={(event) => setDaily(Number(event.target.value))} /></label>
+            <label>Electricity used in one day<span className="hint">In kilowatt-hours. A typical house is about 20 to 40.</span><input type="number" value={daily} onChange={(event) => setDaily(Number(event.target.value))} /></label>
           ) : null}
-          <label>Tilt, degrees<input type="number" value={tilt} onChange={(event) => setTilt(Number(event.target.value))} /></label>
-          <label>Azimuth, degrees clockwise from north<input type="number" value={azimuth} onChange={(event) => setAzimuth(Number(event.target.value))} /></label>
+          <label>How steep the panels are<span className="hint">0 is flat. A house roof is often about 20 to 30.</span><input type="number" value={tilt} onChange={(event) => setTilt(Number(event.target.value))} /></label>
+          <label>Which way they face<span className="hint">180 is south. 0 is north. 90 is east. 270 is west.</span><input type="number" value={azimuth} onChange={(event) => setAzimuth(Number(event.target.value))} /></label>
           <p className="muted">{advice.summary} Rule of thumb: {advice.preferredAzimuthDeg}° at {advice.ruleOfThumbTiltDeg}°.</p>
           {slug === "solar-shading-calculator" ? (
             <>
@@ -74,7 +74,7 @@ export function ToolPage({ slug, title, intro }: { slug: string; title: string; 
               <label>Import rate, USD/kWh<input type="number" step="0.01" value={rate} onChange={(event) => setRate(Number(event.target.value))} /></label>
             </>
           ) : null}
-          <label>Shading loss, fraction<input type="number" step="0.01" value={shading} onChange={(event) => setShading(Number(event.target.value))} /></label>
+          <label>Shade from trees<span className="hint">0 is full sun. 0.20 means about one fifth of the sun is blocked.</span><input type="number" step="0.01" value={shading} onChange={(event) => setShading(Number(event.target.value))} /></label>
         </form>
         <div className="card fields">
           <Results slug={slug} production={production} sized={sized} latitude={latitude} longitude={-104.99} timezone={-6} treeHeight={treeHeight} treeDistance={treeDistance} azimuth={azimuth} series={series} cost={cost} rate={rate} daily={daily} autonomy={autonomy} setAutonomy={setAutonomy} tilt={tilt} />
@@ -106,7 +106,7 @@ function Results(props: {
   if (props.slug === "solar-panel-angle-calculator") {
     return (
       <>
-        <h2>Annual kWh per installed kW</h2>
+        <h2>Electricity per year from each kilowatt of panels</h2>
         <ul>
           {[0, 15, 30, 45].map((tilt) => {
             const row = estimateProduction({ latitudeDeg: props.latitude, tiltDeg: tilt, azimuthDeg: props.azimuth, arrayKw: 1 });
@@ -184,7 +184,7 @@ function Results(props: {
   }
   return (
     <>
-      <p className="stat">{kwh(props.sized.production.annualAcKwh)}<small>AC from {props.sized.panelCount} × sample-size modules</small></p>
+      <p className="stat">{kwh(props.sized.production.annualAcKwh)}<small>electricity per year from {props.sized.panelCount} sample panels</small></p>
       <p>{kw(props.sized.arrayKw)} DC. Capacity factor {(props.sized.production.capacityFactor * 100).toFixed(1)}%. Residual annual use {kwh(props.sized.residualAcKwh)}.</p>
       <MonthBars values={props.sized.production.monthly.map((month) => month.acKwh)} labels={props.sized.production.monthly.map((month) => month.month)} />
     </>

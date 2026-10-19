@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react";
 
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [theme, setTheme] = useState<"dark" | "light">("light");
 
   useEffect(() => {
     const stored = window.localStorage.getItem("solarforge.theme");
-    const next = stored === "light" ? "light" : "dark";
+    const next = stored === "dark" ? "dark" : "light";
     document.documentElement.dataset.theme = next;
     setTheme(next);
   }, []);

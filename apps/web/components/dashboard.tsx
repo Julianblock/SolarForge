@@ -19,8 +19,8 @@ export function Dashboard() {
   if (projects.length === 0) {
     return (
       <div className="wrap section">
-        <h1 className="display">No saved projects yet.</h1>
-        <p className="muted">Projects stay in this browser until you create an account with the database running.</p>
+        <h1 className="display">No saved plans yet.</h1>
+        <p className="muted">A plan stays in this browser until you create an account. Start with one house. It is free.</p>
         <Link className="btn btn-primary" href="/start">Start Designing — Free</Link>
       </div>
     );
@@ -28,8 +28,8 @@ export function Dashboard() {
 
   return (
     <div className="wrap section">
-      <p className="kicker">Dashboard</p>
-      <h1 className="display">Your planning set.</h1>
+      <p className="kicker">Saved on this browser</p>
+      <h1 className="display">Your plans</h1>
       {message ? <p className="banner">{message}</p> : null}
       <div className="fields">
         {projects.map((project) => {
@@ -49,16 +49,16 @@ export function Dashboard() {
                 <>
                   <Disclaimer />
                   <div className="grid-3">
-                    <p className="stat">{kw(results.arrayKw)}<small>DC capacity</small></p>
-                    <p className="stat">{results.panelCount}<small>panels</small></p>
-                    <p className="stat">{results.battery ? `${results.battery.usableBankKwh.toFixed(1)} kWh` : "—"}<small>usable battery</small></p>
-                    <p className="stat">{kwh(results.array.production.annualAcKwh)}<small>annual AC</small></p>
-                    <p className="stat">{Math.round(results.array.offsetFraction * 100)}%<small>annual offset</small></p>
-                    <p className="stat">{usd(results.finance.scenarios[1]?.netCostUsd ?? 0)}<small>cost assumption</small></p>
+                    <p className="stat">{kw(results.arrayKw)}<small>system size</small></p>
+                    <p className="stat">{results.panelCount}<small>solar panels</small></p>
+                    <p className="stat">{results.battery ? `${results.battery.usableBankKwh.toFixed(1)} kWh` : "None"}<small>battery you can actually use</small></p>
+                    <p className="stat">{kwh(results.array.production.annualAcKwh)}<small>electricity per year</small></p>
+                    <p className="stat">{Math.round(results.array.offsetFraction * 100)}%<small>of the yearly bill this might cover</small></p>
+                    <p className="stat">{usd(results.finance.scenarios[1]?.netCostUsd ?? 0)}<small>rough cost, not a quote</small></p>
                   </div>
-                  <h3>Monthly generation</h3>
+                  <h3>Electricity by month</h3>
                   <MonthBars values={results.array.production.monthly.map((month) => month.acKwh)} labels={results.array.production.monthly.map((month) => month.month)} />
-                  <p className="muted">Completion: location, usage, and array are set. {project.site.areaM2 ? "Area is entered." : "Area is still blank."} {results.battery ? "Battery is sized." : "Battery is off."}</p>
+                  <p className="muted">This plan has a place, a power bill, and a panel direction. {project.site.areaM2 ? "Roof area is filled in." : "Roof area is still blank, which is fine."} {results.battery ? "A battery is included." : "No battery yet."}</p>
                 </>
               ) : <p className="banner">This saved project could not be recalculated.</p>}
               <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>

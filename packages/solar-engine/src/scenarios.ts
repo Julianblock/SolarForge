@@ -29,24 +29,24 @@ export interface DesignScenario {
 
 const COPY: Record<ScenarioId, { title: string; description: string }> = {
   "lowest-cost": {
-    title: "Lowest upfront cost",
-    description: "Covers about 70% of annual use with the rule-of-thumb tilt and no battery in this comparison.",
+    title: "Spend less",
+    description: "Fewer panels. Covers about 70% of a year of electricity. No battery.",
   },
   "max-production": {
-    title: "Maximum annual production",
-    description: "Uses the modeled tilt and a 100% annual offset, still without storage.",
+    title: "Make the most electricity",
+    description: "Enough panels to match a full year of use. No battery, so nights still come from the power company.",
   },
   "best-backup": {
-    title: "Best battery backup",
-    description: "Sizes the array for the load and adds two days of storage when a battery module is selected.",
+    title: "Keep the lights on",
+    description: "Panels for your usage, plus a battery for about two days without sun, if you turned a battery on.",
   },
   independence: {
-    title: "Energy independence",
-    description: "Targets 120% of annual use and three days of storage when a battery module is selected.",
+    title: "Cover more than you use",
+    description: "About 20% extra panels, plus a battery for about three days, if you turned a battery on.",
   },
   balanced: {
-    title: "Balanced",
-    description: "Targets a full annual offset at the rule-of-thumb tilt, with one day of storage when a battery is selected.",
+    title: "A middle option",
+    description: "Enough panels for a full year, and one day of battery if you turned a battery on.",
   },
 };
 

@@ -100,8 +100,8 @@ export function LayoutDesigner() {
   return (
     <div className="wrap section">
       <p className="kicker">Layout</p>
-      <h1 className="display">Measured roof, not a satellite guess.</h1>
-      <Disclaimer>Enter dimensions you measured. A map or photo does not establish roof size, fire setbacks, or structural capacity.</Disclaimer>
+      <h1 className="display">Draw the roof you measured.</h1>
+      <Disclaimer>Type the width and length you measured with a tape. A photo or a map is not a measurement, and this drawing is not a permit.</Disclaimer>
       <div className="grid-2" style={{ marginTop: "1rem" }}>
         <div className="card fields">
           <label>Roof width, m<input type="number" value={width} onChange={(event) => setWidth(Number(event.target.value))} /></label>

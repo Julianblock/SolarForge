@@ -6,7 +6,7 @@ export function Disclaimer({ children }: { children?: string }) {
   return (
     <p className="banner">
       {children ??
-        "Preliminary estimate. Weather, shading, structure, wiring, and permits still need local verification. This is not an engineering-certified plan."}
+        "This is a rough plan, not a permit. A local electrician still has to check the roof, the wires, and the rules where you live."}
     </p>
   );
 }
@@ -14,13 +14,16 @@ export function Disclaimer({ children }: { children?: string }) {
 export function MonthBars({ values, labels }: { values: number[]; labels: string[] }) {
   const max = Math.max(...values, 1);
   return (
-    <div className="bars" role="img" aria-label="Monthly values">
+    <>
+    <p className="fine">Each bar is one month. January is on the left. December is on the right.</p>
+    <div className="bars" role="img" aria-label="Monthly values, January through December">
       {values.map((value, index) => (
         <div key={labels[index] ?? index} style={{ height: `${Math.max(6, (value / max) * 100)}%` }} title={`${labels[index]} ${Math.round(value)}`}>
           <span>{labels[index]?.slice(0, 1)}</span>
         </div>
       ))}
     </div>
+    </>
   );
 }
 

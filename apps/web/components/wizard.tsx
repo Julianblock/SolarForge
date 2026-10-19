@@ -18,7 +18,16 @@ import { track } from "@/lib/track";
 import { Compass, Disclaimer, MonthBars, SunPath } from "./visuals";
 
 const SiteMap = dynamic(() => import("./site-map"), { ssr: false });
-const steps = ["About", "System", "Location", "Site", "Usage", "Goals", "Array", "Results"];
+const steps = [
+  "Name this plan",
+  "What kind of system",
+  "Where is the house",
+  "Roof or ground",
+  "Your power bill",
+  "What you want",
+  "Which way the panels face",
+  "Your estimate",
+];
 
 export function ProjectWizard() {
   const router = useRouter();
@@ -82,19 +91,22 @@ export function ProjectWizard() {
 
   return (
     <div className="wrap section">
-      <p className="kicker">New project</p>
-      <h1 className="display">Tell SolarForge about the site.</h1>
-      <p className="muted">Optional fields can be skipped. Numbers you skip stay labeled as estimates.</p>
-      <ol style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", padding: 0, listStyle: "none" }}>
-        {steps.map((label, index) => (
-          <li key={label}><button className={index === step ? "btn btn-primary" : "btn btn-secondary"} type="button" onClick={() => setStep(index)}>{label}</button></li>
-        ))}
-      </ol>
+      <p className="kicker">Step {step + 1} of {steps.length}</p>
+      <h1 className="display">{steps[step]}</h1>
+      <p className="muted">One page at a time. Skip anything you do not know. Every number is an estimate until a local installer checks it.</p>
+      <label>
+        Jump to another step
+        <select value={step} onChange={(event) => setStep(Number(event.target.value))}>
+          {steps.map((label, index) => (
+            <option key={label} value={index}>{index + 1}. {label}</option>
+          ))}
+        </select>
+      </label>
       {error ? <p className="banner">{error}</p> : null}
       <div className="card" style={{ marginTop: "1rem" }}>
         {step === 0 && (
           <div className="fields">
-            <label>Project name<input value={project.name} onChange={(event) => update({ name: event.target.value })} /></label>
+            <label>Name this plan<span className="hint">For example, “Main house.” You can change it later.</span><input value={project.name} onChange={(event) => update({ name: event.target.value })} /></label>
             <label>Experience
               <select value={project.experience} onChange={(event) => update({ experience: event.target.value as SolarProject["experience"] })}>
                 <option value="beginner">Beginner — plain explanations</option>
@@ -153,9 +165,9 @@ export function ProjectWizard() {
         )}
         {step === 4 && (
           <div className="fields">
-            <label>Monthly kWh<input type="number" value={project.usage.monthlyKwh ?? ""} onChange={(event) => update({ usage: { ...project.usage, monthlyKwh: event.target.value ? Number(event.target.value) : undefined, annualKwh: undefined } })} /></label>
-            <label>Or monthly bill, USD<input type="number" value={project.usage.monthlyBillUsd ?? ""} onChange={(event) => update({ usage: { ...project.usage, monthlyBillUsd: event.target.value ? Number(event.target.value) : undefined } })} /></label>
-            <label>Energy rate, USD per kWh<input type="number" step="0.01" value={project.usage.rateUsdPerKwh ?? 0.16} onChange={(event) => update({ usage: { ...project.usage, rateUsdPerKwh: Number(event.target.value) } })} /></label>
+            <label>Kilowatt-hours on the bill<span className="hint">Look for kWh. That is energy used, not the dollar amount.</span><input type="number" value={project.usage.monthlyKwh ?? ""} onChange={(event) => update({ usage: { ...project.usage, monthlyKwh: event.target.value ? Number(event.target.value) : undefined, annualKwh: undefined } })} /></label>
+            <label>Or the monthly bill in dollars<span className="hint">Use this if you cannot find the kilowatt-hours.</span><input type="number" value={project.usage.monthlyBillUsd ?? ""} onChange={(event) => update({ usage: { ...project.usage, monthlyBillUsd: event.target.value ? Number(event.target.value) : undefined } })} /></label>
+            <label>What you pay per kilowatt-hour<span className="hint">Often around 10 to 30 cents. 0.16 means 16 cents.</span><input type="number" step="0.01" value={project.usage.rateUsdPerKwh ?? 0.16} onChange={(event) => update({ usage: { ...project.usage, rateUsdPerKwh: Number(event.target.value) } })} /></label>
             <button className="btn btn-secondary" type="button" onClick={() => setUseAppliances((value) => !value)}>{useAppliances ? "Hide appliances" : "Add appliances"}</button>
             {useAppliances && APPLIANCE_TEMPLATES.map((template) => {
               const selected = project.usage.appliances.some((item) => item.id === template.id);
@@ -203,13 +215,13 @@ export function ProjectWizard() {
           <div className="fields two">
             <Compass azimuth={project.array.azimuthDeg} onChange={(azimuthDeg) => update({ array: { ...project.array, azimuthDeg } })} />
             <div>
-              <label>Azimuth {project.array.azimuthDeg}°<input type="range" min={0} max={359} value={project.array.azimuthDeg} onChange={(event) => update({ array: { ...project.array, azimuthDeg: Number(event.target.value) } })} /></label>
-              <label>Tilt {project.array.tiltDeg}°<input type="range" min={0} max={60} value={project.array.tiltDeg} onChange={(event) => update({ array: { ...project.array, tiltDeg: Number(event.target.value) } })} /></label>
-              <label>Module STC watts<input type="number" value={project.array.panelWatts} onChange={(event) => update({ array: { ...project.array, panelWatts: Number(event.target.value) } })} /></label>
+              <label>Direction {project.array.azimuthDeg}°<span className="hint">0 is north, 90 is east, 180 is south, 270 is west.</span><input type="range" min={0} max={359} value={project.array.azimuthDeg} onChange={(event) => update({ array: { ...project.array, azimuthDeg: Number(event.target.value) } })} /></label>
+              <label>Slope {project.array.tiltDeg}°<span className="hint">0 is flat. A house roof is often about 20 to 30.</span><input type="range" min={0} max={60} value={project.array.tiltDeg} onChange={(event) => update({ array: { ...project.array, tiltDeg: Number(event.target.value) } })} /></label>
+              <label>Watts of one panel<span className="hint">A common panel is about 400 watts. Bigger panels are not always better if the roof is small.</span><input type="number" value={project.array.panelWatts} onChange={(event) => update({ array: { ...project.array, panelWatts: Number(event.target.value) } })} /></label>
               <button className="btn btn-secondary" type="button" onClick={() => {
                 const advice = orientationAdvice(project.location.latitudeDeg);
                 update({ array: { ...project.array, azimuthDeg: advice.preferredAzimuthDeg, tiltDeg: advice.ruleOfThumbTiltDeg } });
-              }}>Use equator-facing suggestion</button>
+              }}>Point the panels toward the sun</button>
               <p className="muted">{results?.orientation.summary}</p>
             </div>
             <SunPath latitude={project.location.latitudeDeg} longitude={project.location.longitudeDeg} timezone={project.location.timezoneOffsetHours} />
@@ -219,16 +231,16 @@ export function ProjectWizard() {
           <div className="fields">
             <Disclaimer />
             <div className="grid-3">
-              <p className="stat">{results.panelCount}<small>modules</small></p>
-              <p className="stat">{kw(results.arrayKw)}<small>DC nameplate</small></p>
-              <p className="stat">{kwh(results.array.production.annualAcKwh)}<small>AC per year</small></p>
+              <p className="stat">{results.panelCount}<small>solar panels</small></p>
+              <p className="stat">{kw(results.arrayKw)}<small>how big the system is</small></p>
+              <p className="stat">{kwh(results.array.production.annualAcKwh)}<small>electricity it might make in a year</small></p>
             </div>
             <MonthBars values={results.array.production.monthly.map((month) => month.acKwh)} labels={results.array.production.monthly.map((month) => month.month)} />
-            <h3>Scenarios</h3>
+            <h3>Five ways to build it</h3>
             {results.scenarios.map((scenario) => (
               <p key={scenario.id}><strong>{scenario.title}.</strong> {scenario.description} {scenario.array.panelCount} panels, {kwh(scenario.array.production.annualAcKwh)} / year{scenario.battery ? `, battery ${scenario.battery.usableBankKwh.toFixed(1)} kWh usable` : ""}.</p>
             ))}
-            <p>Medium payback: {results.finance.scenarios[1]?.simplePaybackYears?.toFixed(1) ?? "not paid back in the model"} years. Placeholder installed cost {usd(results.finance.scenarios[1]?.netCostUsd ?? 0)}.</p>
+            <p>{middleYears(results.finance.scenarios[1]?.simplePaybackYears)} The price used here is a placeholder of {usd(results.finance.scenarios[1]?.netCostUsd ?? 0)}, not a quote from an installer.</p>
             <button className="btn btn-primary" type="button" onClick={save}>Save project</button>
           </div>
         )}
@@ -236,10 +248,15 @@ export function ProjectWizard() {
       </div>
       <div className="no-print" style={{ display: "flex", justifyContent: "space-between", marginTop: "1rem" }}>
         <button className="btn btn-secondary" type="button" disabled={step === 0} onClick={() => setStep((value) => value - 1)}>Back</button>
-        {step < steps.length - 1 ? <button className="btn btn-primary" type="button" onClick={() => { track("wizard_step", { step: steps[step + 1] ?? "" }); setStep((value) => value + 1); }}>Continue</button> : null}
+        {step < steps.length - 1 ? <button className="btn btn-primary" type="button" onClick={() => { track("wizard_step", { step: steps[step + 1] ?? "" }); setStep((value) => value + 1); }}>Next step</button> : null}
       </div>
     </div>
   );
+}
+
+function middleYears(years: number | null | undefined) {
+  if (years == null) return "A middle guess does not pay for itself within 60 years in this model.";
+  return `A middle guess pays for itself in about ${years.toFixed(1)} years.`;
 }
 
 function safeEvaluate(project: SolarProject) {
