@@ -1,12 +1,12 @@
 import { useFonts } from 'expo-font';
-import { DarkTheme, Stack, ThemeProvider } from 'expo-router';
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import 'react-native-reanimated';
 
-import { palette } from '@/constants/theme';
 import { ProjectProvider } from '@/lib/ProjectContext';
+import { AppThemeProvider, useTheme } from '@/lib/ThemeContext';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -19,11 +19,6 @@ export const unstable_settings = {
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
-
-const theme = {
-  ...DarkTheme,
-  colors: { ...DarkTheme.colors, background: palette.bg, card: palette.bg, primary: palette.sun, text: palette.text },
-};
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
@@ -46,13 +41,28 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={theme}>
+    <AppThemeProvider>
       <ProjectProvider>
-        <StatusBar style="light" />
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        </Stack>
+        <RootLayoutNav />
       </ProjectProvider>
+    </AppThemeProvider>
+  );
+}
+
+function RootLayoutNav() {
+  const { colors } = useTheme();
+  const navTheme = useMemo(() => {
+    const base = colors.scheme === 'dark' ? DarkTheme : DefaultTheme;
+    return { ...base, colors: { ...base.colors, background: colors.bg, card: colors.surface, primary: colors.sun, text: colors.text, border: colors.border } };
+  }, [colors]);
+
+  return (
+    <ThemeProvider value={navTheme}>
+      <StatusBar style={colors.scheme === 'dark' ? 'light' : 'dark'} />
+      <Stack>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="onboarding" options={{ headerShown: false, presentation: 'fullScreenModal', gestureEnabled: false }} />
+      </Stack>
     </ThemeProvider>
   );
 }

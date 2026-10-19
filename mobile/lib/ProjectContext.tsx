@@ -1,29 +1,45 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { evaluateProject, exampleProject, type ProjectResults, type SolarProject } from "@solarforge/shared";
 import { loadProjects, saveProject } from "@/lib/projects";
+
+const ONBOARDED_KEY = "solarforge.mobile.onboarded";
 
 interface ProjectContextValue {
   project: SolarProject;
   results: ProjectResults | null;
   error: string | null;
+  /** True once storage has been read, so first-run checks don't fire early. */
+  loaded: boolean;
+  onboarded: boolean;
   update: (change: (project: SolarProject) => SolarProject) => void;
-  save: () => Promise<void>;
-  savedAt: Date | null;
+  finishOnboarding: () => void;
+  restartOnboarding: () => void;
 }
 
 const ProjectContext = createContext<ProjectContextValue | null>(null);
 
 export function ProjectProvider({ children }: { children: ReactNode }) {
   const [project, setProject] = useState<SolarProject>(() => exampleProject());
-  const [savedAt, setSavedAt] = useState<Date | null>(null);
+  const [loaded, setLoaded] = useState(false);
+  const [onboarded, setOnboarded] = useState(false);
+  const dirty = useRef(false);
 
   useEffect(() => {
-    loadProjects()
-      .then(([stored]) => {
+    Promise.all([loadProjects(), AsyncStorage.getItem(ONBOARDED_KEY)])
+      .then(([[stored], flag]) => {
         if (stored) setProject(stored);
+        setOnboarded(flag === "1");
       })
-      .catch(() => undefined);
+      .catch(() => undefined)
+      .finally(() => setLoaded(true));
   }, []);
+
+  useEffect(() => {
+    if (!loaded || !dirty.current) return;
+    const timer = setTimeout(() => void saveProject(project).catch(() => undefined), 400);
+    return () => clearTimeout(timer);
+  }, [project, loaded]);
 
   const { results, error } = useMemo(() => {
     try {
@@ -38,14 +54,22 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
       project,
       results,
       error,
-      savedAt,
-      update: (change) => setProject((current) => ({ ...change(current), updatedAt: new Date().toISOString() })),
-      save: async () => {
-        await saveProject(project);
-        setSavedAt(new Date());
+      loaded,
+      onboarded,
+      update: (change) => {
+        dirty.current = true;
+        setProject((current) => ({ ...change(current), updatedAt: new Date().toISOString() }));
+      },
+      finishOnboarding: () => {
+        setOnboarded(true);
+        void AsyncStorage.setItem(ONBOARDED_KEY, "1").catch(() => undefined);
+      },
+      restartOnboarding: () => {
+        setOnboarded(false);
+        void AsyncStorage.removeItem(ONBOARDED_KEY).catch(() => undefined);
       },
     }),
-    [project, results, error, savedAt],
+    [project, results, error, loaded, onboarded],
   );
 
   return <ProjectContext.Provider value={value}>{children}</ProjectContext.Provider>;
